@@ -1,0 +1,39 @@
+# Build artifacts
+bin/
+obj/
+TestResults/
+*.nupkg
+*.snupkg
+
+# NuGet packaging
+*.nuspec
+*.nupkg.sha512
+
+# User-specific files
+*.user
+*.suo
+*.vs/
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Dotnet-specific cache folders
+.project/
+_ReSharper*/
+*.DotSettings.user
+
+# Auto-generated logs or configs
+*.log
+
+# local NuGet source folder
+/packages/
+
+# local tools or signing keys
+*.pfx
+*.snk

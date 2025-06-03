@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+   <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+
+    <PackageId>SmartStrings</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Jonatas Olziris Martins</Authors>
+    <Company>YourCompany</Company>
+    <Description>SmartStrings is a lightweight string templating library for C# with support for named placeholders, fallbacks, and object binding.</Description>
+    <PackageTags>string;templating;placeholder;interpolation;utility</PackageTags>
+    <RepositoryUrl>https://github.com/jonatasolmartins/smart-strings</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jonatasolmartins/smart-strings</PackageProjectUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSource>true</IncludeSource>
+    <PackageIcon>logo.png</PackageIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="logo.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  
+</Project>
