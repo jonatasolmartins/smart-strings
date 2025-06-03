@@ -16,7 +16,7 @@
   - An object
   - A dictionary
 - ✅ Safe: handles `null`, missing keys, and extra placeholders gracefully
-- ✅ Works with .NET 6, 7, 8 and future versions
+- ✅ Works with .NET Framework (4.6.1+), .NET 6, 7, 8 and future versions
 
 ---
 
@@ -123,7 +123,7 @@ string Fill(this string template, Dictionary<string, string?> values);
 ## 🛠 Compatibility
 
 SmartStrings targets:
-
+- ✅ .NET Framework (4.6.1+)
 - ✅ .NET 6
 - ✅ .NET 7
 - ✅ .NET 8 and above
