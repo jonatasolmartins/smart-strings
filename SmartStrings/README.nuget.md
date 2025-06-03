@@ -32,7 +32,7 @@ var result = template.Fill("Alice");
 ### ✅ 2. Using fallback values
 
 ```csharp
-var template = "Hi {name:Guest}, welcome!";
+const string template = "Hi {name:Guest}, welcome!";
 var result = template.Fill(new { });
 // Result: "Hi Guest, welcome!"
 ```
@@ -49,4 +49,4 @@ dotnet add package SmartStrings
 ```
 
 📚 Full source, license, and documentation available at  
-[github.com/yourusername/smart-string](https://github.com/jonatasolmartins/smart-strings)
+[github.com/jonatasolmartins/smart-strings](https://github.com/jonatasolmartins/smart-strings)

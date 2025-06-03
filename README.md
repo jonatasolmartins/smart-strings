@@ -53,7 +53,7 @@ var result = template.Fill("Alice");
 ### ✅ 2. Multiple placeholders (ordered)
 
 ```csharp
-var template = "Hello {0}, your plan is {1}";
+const string template = "Hello {0}, your plan is {1}";
 var result = template.Fill("Joe", "Premium");
 // Result: "Hello Joe, your plan is Premium"
 ```
@@ -132,7 +132,7 @@ SmartStrings targets:
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).  
+This project is licensed under the [MIT License](./%20LICENSE.txt).
 © 2025 Jonatas Olziris Martins. All rights reserved.
 
 You may use, modify, and distribute this library in commercial and non-commercial applications. Attribution required.
