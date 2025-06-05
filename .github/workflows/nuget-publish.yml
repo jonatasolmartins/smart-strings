@@ -36,4 +36,4 @@ jobs:
 
       - name: Publish to NuGet.org
         if: startsWith(github.ref, 'refs/tags/v')
-        run: dotnet nuget push SmartStrings/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push SmartStrings/bin/Debug/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
