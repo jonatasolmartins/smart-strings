@@ -9,7 +9,7 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
 
     <PackageId>SmartStrings</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>Jonatas Olziris Martins</Authors>
     <Company>Jonatas Olziris Martins</Company>
     <Description>SmartStrings is a lightweight string templating library for C# with support for named placeholders, fallbacks, and object binding.</Description>
@@ -19,15 +19,18 @@
     <RepositoryUrl>https://github.com/jonatasolmartins/smart-strings</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/jonatasolmartins/smart-strings</PackageProjectUrl>
-    <PackageIcon>logo.png</PackageIcon>
+    <PackageIcon>logo-nuget.png</PackageIcon>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <EnableSourceLink>true</EnableSourceLink>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <Deterministic>true</Deterministic>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   
   <ItemGroup>
     <None Include="README.nuget.md" Pack="true" PackagePath="" />
-    <None Include="logo.png" Pack="true" PackagePath="\" />
+    <None Include="logo-nuget.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,13 @@
 # SmartStrings
 
+
+![SmartStrings logo](./SmartStrings/logo-readme.png)
+
+[![CI](https://github.com/jonatasolmartins/smart-strings/actions/workflows/nuget-publish.yml/badge.svg)](https://github.com/jonatasolmartins/smart-strings/actions/workflows/nuget-publish.yml)
+[![NuGet](https://img.shields.io/nuget/v/SmartStrings.svg)](https://www.nuget.org/packages/SmartStrings)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/SmartStrings.svg)](https://www.nuget.org/packages/SmartStrings)
+[![GitHub stars](https://img.shields.io/github/stars/jonatasolmartins/smart-strings.svg?style=social)](https://github.com/jonatasolmartins/smart-strings/stargazers)
+
 **SmartStrings** is a lightweight and intuitive C# string templating library. It adds extension methods like `.Fill()` that let you replace placeholders in strings using objects, dictionaries, or parameter arrays — with optional fallbacks.
 
 > 💡 Inspired by the flexibility of `$"{name}"`, but better suited for dynamic or external templates.
@@ -129,6 +137,21 @@ SmartStrings targets:
 - ✅ .NET 8 and above
 
 ---
+
+---
+
+## 💖 Support This Project
+
+If SmartStrings has saved you time or made your life easier, please consider:
+
+- ⭐ Starring the repo
+- 📣 Sharing it with others
+- 🧩 [Contributing](/CONTRIBUTING.md) with ideas, feedback, or pull requests
+
+
+Thank you! 🙌
+
+☕ [Buy Me a Coffee](https://buymeacoffee.com/jonatasolmartins)
 
 ## 📄 License
 
