@@ -9,7 +9,7 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
 
     <PackageId>SmartStrings</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>Jonatas Olziris Martins</Authors>
     <Company>Jonatas Olziris Martins</Company>
     <Description>SmartStrings is a lightweight string templating library for C# with support for named placeholders, fallbacks, and object binding.</Description>

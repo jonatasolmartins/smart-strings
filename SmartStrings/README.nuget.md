@@ -1,5 +1,4 @@
 # SmartStrings
-![SmartStrings logo](./logo-nuget.png)
 
 **SmartStrings** is a lightweight and intuitive C# string templating library. It adds extension methods like `.Fill()` that let you replace placeholders in strings using objects, dictionaries, or parameter arrays — with optional fallbacks.
 
