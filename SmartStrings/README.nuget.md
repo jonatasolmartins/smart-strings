@@ -13,6 +13,7 @@
   - Multiple ordered values
   - An object
   - A dictionary
+  - Nested object
 - ✅ Safe: handles `null`, missing keys, and extra placeholders gracefully
 - ✅ Works with .NET Framework (4.6.1+), .NET 6, 7, 8 and future versions
 
@@ -37,6 +38,10 @@ var result = template.Fill("Alice");
 const string template = "Hello {0}, your plan is {1}";
 var result = template.Fill("Joe", "Premium");
 // Result: "Hello Joe, your plan is Premium"
+
+// Alternative
+var result = TemplateString.Fill(template, "Joe", "Premium");
+// Result: "Hello Joe, your plan is Premium"
 ```
 
 Or using named placeholders:
@@ -52,7 +57,7 @@ var result = template.Fill("Jonatas", "Gold");
 ### ✅ 3. Using a dictionary
 
 ```csharp
-const string template = "Hi {name}, you're on the {plan} plan.";
+var template = "Hi {name}, you're on the {plan} plan.";
 var result = template.Fill(new Dictionary<string, string?>
 {
     ["name"] = "Carla",
@@ -80,6 +85,39 @@ var template = "Hi {name:Guest}, welcome!";
 var result = template.Fill(new { });
 // Result: "Hi Guest, welcome!"
 ```
+
+## ✅ 6. Manual mapping with nested model
+
+```csharp
+var card = new Card()
+{
+    User = new User() {
+        Name = "Brian",
+        Company = "SmartCo"
+    }
+};
+const string template = "Welcome {NAME} from {COMPANY}"
+
+template.Fill(card, map => {
+    map.Bind("NAME", c => c.User.Name);
+    map.Bind("COMPANY", c => c.User.Company);
+});
+// Welcome Brian from SmartCo
+```
+
+---
+
+## ✅ 7. Using TemplateString.Fill (Alternative API)
+
+```csharp
+TemplateString.Fill("Hello {USERNAME}", new { USERNAME = "Joana" });
+
+TemplateString.Fill("User: {NAME}", user, map => {
+    map.Bind("NAME", u => u.User.Name);
+});
+```
+---
+
 
 ## ✅ Compatibility
 
