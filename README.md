@@ -3,9 +3,10 @@
 
 ![SmartStrings logo](./SmartStrings/logo-readme.png)
 
-[![CI](https://github.com/jonatasolmartins/smart-strings/actions/workflows/nuget-publish.yml/badge.svg)](https://github.com/jonatasolmartins/smart-strings/actions/workflows/nuget-publish.yml)
 [![NuGet](https://img.shields.io/nuget/v/SmartStrings.svg)](https://www.nuget.org/packages/SmartStrings)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/SmartStrings.svg)](https://www.nuget.org/packages/SmartStrings)
+[![CI](https://github.com/jonatasolmartins/smart-strings/actions/workflows/nuget-publish.yml/badge.svg)](https://github.com/jonatasolmartins/smart-strings/actions/workflows/nuget-publish.yml)
+[![Coverage Status](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/jonatasolmartins/smart-strings)
 [![GitHub stars](https://img.shields.io/github/stars/jonatasolmartins/smart-strings.svg?style=social)](https://github.com/jonatasolmartins/smart-strings/stargazers)
 
 **SmartStrings** is a lightweight and intuitive C# string templating library. It adds extension methods like `.Fill()` that let you replace placeholders in strings using objects, dictionaries, or parameter arrays — with optional fallbacks.
@@ -23,6 +24,7 @@
   - Multiple ordered values
   - An object
   - A dictionary
+  - Nested object
 - ✅ Safe: handles `null`, missing keys, and extra placeholders gracefully
 - ✅ Works with .NET Framework (4.6.1+), .NET 6, 7, 8 and future versions
 
@@ -63,6 +65,10 @@ var result = template.Fill("Alice");
 ```csharp
 const string template = "Hello {0}, your plan is {1}";
 var result = template.Fill("Joe", "Premium");
+// Result: "Hello Joe, your plan is Premium"
+
+// Alternative
+var result = TemplateString.Fill(template, "Joe", "Premium");
 // Result: "Hello Joe, your plan is Premium"
 ```
 
@@ -108,6 +114,36 @@ var result = template.Fill(new { });
 // Result: "Hi Guest, welcome!"
 ```
 
+## ✅ 6. Manual mapping with nested model
+
+```csharp
+var card = new Card()
+{
+    User = new User() {
+        Name = "Brian",
+        Company = "SmartCo"
+    }
+};
+const string template = "Welcome {NAME} from {COMPANY}"
+
+template.Fill(card, map => {
+    map.Bind("NAME", c => c.User.Name);
+    map.Bind("COMPANY", c => c.User.Company);
+});
+// Welcome Brian from SmartCo
+```
+
+---
+
+## ✅ 7. Using TemplateString.Fill (Alternative API)
+
+```csharp
+TemplateString.Fill("Hello {USERNAME}", new { USERNAME = "Joana" });
+
+TemplateString.Fill("User: {NAME}", user, map => {
+    map.Bind("NAME", u => u.User.Name);
+});
+```
 ---
 
 ## 🧪 Supported APIs
@@ -119,11 +155,15 @@ string Fill(this string template, string value);
 // Replace all {..} in order
 string Fill(this string template, params string[] values);
 
-// Replace named placeholders with object properties
-string Fill(this string template, object values);
+/// Replaces placeholders in the template with values from a model or primitive values..
+string Fill<T>(this string template, T values);
 
 // Replace named placeholders with dictionary values
 string Fill(this string template, Dictionary<string, string?> values);
+
+// Fills a template using the flat properties of a model, allowing custom overrides for nested or formatted values.
+string Fill<T>(this string template, T model, Action<TemplateMap<T>> map)
+
 ```
 
 ---
