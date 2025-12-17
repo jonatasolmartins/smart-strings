@@ -149,11 +149,13 @@ namespace SmartStrings
         /// <summary>
         /// Replaces placeholders in the template with values from a model.
         /// Supports both flat objects (with public properties) and primitive values.
-        /// Named placeholders support fallback values in the form <c>{key:fallback}</c>.
+        /// Named placeholders support format specifiers in the form <c>{key:format}</c> for IFormattable types,
+        /// or fallback values for non-formattable types.
         /// </summary>
         /// <remarks>
         /// If the model is a primitive or string, replaces the first placeholder only.
         /// If the template is null or empty, it is returned as is.
+        /// Format specifiers work with DateTime, decimal, int, and other IFormattable types.
         /// </remarks>
         /// <param name="template">The template string containing named or positional placeholders.</param>
         /// <param name="values">A value or object whose data is used to fill the template.</param>
@@ -164,7 +166,7 @@ namespace SmartStrings
             if (string.IsNullOrEmpty(template)) return template;
 
             if (values is null)
-                return template.Fill(new Dictionary<string, string?>());
+                return template.FillWithObjects(new Dictionary<string, object?>());
 
             var type = typeof(T);
 
@@ -173,13 +175,13 @@ namespace SmartStrings
                 return template.Fill(values?.ToString() ?? string.Empty);
             }
 
-            var dict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            var dict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
             foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                dict[prop.Name] = prop.GetValue(values)?.ToString();
+                dict[prop.Name] = prop.GetValue(values);
             }
 
-            return template.Fill(dict);
+            return template.FillWithObjects(dict);
 
         }
 
@@ -221,6 +223,44 @@ namespace SmartStrings
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Replaces named placeholders in the template with values from a dictionary of objects.
+        /// Supports format specifiers for IFormattable types (DateTime, decimal, etc.) in the form <c>{key:format}</c>.
+        /// For non-formattable types, the colon value is used as a fallback.
+        /// </summary>
+        private static string FillWithObjects(this string template, Dictionary<string, object?> values)
+        {
+            if (string.IsNullOrEmpty(template)) return template;
+
+            return NamedPlaceholderRegex.Replace(template, match =>
+            {
+                var key = match.Groups[1].Value;
+                var formatOrFallback = match.Groups[2].Success ? match.Groups[2].Value : string.Empty;
+
+                if (values.TryGetValue(key, out var value) && value != null)
+                {
+                    // Check if value implements IFormattable and has a format/fallback specified
+                    if (value is IFormattable formattable && !string.IsNullOrEmpty(formatOrFallback))
+                    {
+                        try
+                        {
+                            // Try to apply format - if it fails, treat as fallback
+                            return formattable.ToString(formatOrFallback, System.Globalization.CultureInfo.InvariantCulture);
+                        }
+                        catch
+                        {
+                            // Format string was invalid, use as fallback instead
+                            return formatOrFallback;
+                        }
+                    }
+                    return value.ToString() ?? string.Empty;
+                }
+
+                // Key not found or value is null, use fallback
+                return formatOrFallback;
+            });
         }
     }
 

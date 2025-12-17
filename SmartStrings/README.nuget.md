@@ -7,6 +7,7 @@
 ## ✨ Features
 
 - ✅ Replace named placeholders like `{name}`, `{plan}`, etc.
+- ✅ **Format specifiers** for dates, numbers, currency: `{date:yyyy-MM-dd}`, `{price:C2}`
 - ✅ Optional fallback values using `{name:Guest}` syntax
 - ✅ Fill from:
   - A single value
@@ -86,7 +87,30 @@ var result = template.Fill(new { });
 // Result: "Hi Guest, welcome!"
 ```
 
-## ✅ 6. Manual mapping with nested model
+---
+
+### ✅ 6. Format specifiers for dates, numbers, and currency
+
+```csharp
+// DateTime formatting
+var template = "Event: {date:yyyy-MM-dd}";
+var result = template.Fill(new { date = new DateTime(2025, 12, 17) });
+// Result: "Event: 2025-12-17"
+
+// Currency formatting
+var template = "Total: {amount:C2}";
+var result = template.Fill(new { amount = 1299.99m });
+// Result: "Total: ¤1,299.99"
+
+// Configuration URLs
+var urlTemplate = "https://api.com/v{version}/orders?date={date:yyyy-MM-dd}";
+var url = urlTemplate.Fill(new { version = 2, date = DateTime.Now });
+// Result: "https://api.com/v2/orders?date=2025-12-17"
+```
+
+---
+
+## ✅ 7. Manual mapping with nested model
 
 ```csharp
 var card = new Card()
@@ -107,7 +131,7 @@ template.Fill(card, map => {
 
 ---
 
-## ✅ 7. Using TemplateString.Fill (Alternative API)
+## ✅ 8. Using TemplateString.Fill (Alternative API)
 
 ```csharp
 TemplateString.Fill("Hello {USERNAME}", new { USERNAME = "Joana" });

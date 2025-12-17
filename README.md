@@ -18,6 +18,7 @@
 ## ✨ Features
 
 - ✅ Replace named placeholders like `{name}`, `{plan}`, etc.
+- ✅ **Format specifiers** for dates, numbers, currency: `{date:yyyy-MM-dd}`, `{price:C2}`
 - ✅ Optional fallback values using `{name:Guest}` syntax
 - ✅ Fill from:
   - A single value
@@ -114,7 +115,64 @@ var result = template.Fill(new { });
 // Result: "Hi Guest, welcome!"
 ```
 
-## ✅ 6. Manual mapping with nested model
+---
+
+### ✅ 6. Format specifiers for dates, numbers, and currency
+
+```csharp
+// DateTime formatting
+var template = "Event date: {date:yyyy-MM-dd}";
+var result = template.Fill(new { date = new DateTime(2025, 12, 17) });
+// Result: "Event date: 2025-12-17"
+
+// Currency formatting
+var template = "Total: {amount:C2}";
+var result = template.Fill(new { amount = 1299.99m });
+// Result: "Total: ¤1,299.99"
+
+// Number formatting
+var template = "Downloads: {count:N0}";
+var result = template.Fill(new { count = 1234567 });
+// Result: "Downloads: 1,234,567"
+
+// Multiple formats in one template
+var template = "Order #{id} on {date:MMM dd, yyyy} - Total: {total:C2}";
+var result = template.Fill(new { 
+    id = 12345,
+    date = new DateTime(2025, 12, 17),
+    total = 599.50m
+});
+// Result: "Order #12345 on Dec 17, 2025 - Total: ¤599.50"
+```
+
+---
+
+### ✅ 7. Configuration-based URL templating
+
+Perfect for `appsettings.json` and HTTP clients:
+
+```json
+{
+  "ApiEndpoints": {
+    "UserOrders": "https://api.company.com/v{version}/users/{userId}/orders?date={date:yyyy-MM-dd}&status={status:active}"
+  }
+}
+```
+
+```csharp
+var urlTemplate = _config["ApiEndpoints:UserOrders"];
+var url = urlTemplate.Fill(new {
+    version = 2,
+    userId = "abc123",
+    date = DateTime.Now,
+    status = "pending"
+});
+// Result: "https://api.company.com/v2/users/abc123/orders?date=2025-12-17&status=pending"
+```
+
+---
+
+## ✅ 8. Manual mapping with nested model
 
 ```csharp
 var card = new Card()
@@ -135,7 +193,7 @@ template.Fill(card, map => {
 
 ---
 
-## ✅ 7. Using TemplateString.Fill (Alternative API)
+## ✅ 9. Using TemplateString.Fill (Alternative API)
 
 ```csharp
 TemplateString.Fill("Hello {USERNAME}", new { USERNAME = "Joana" });

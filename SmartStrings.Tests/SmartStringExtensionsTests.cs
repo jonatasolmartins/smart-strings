@@ -130,4 +130,61 @@ public class SmartStringExtensionsTests
 
         result.ShouldBe("Log: Something {weird} happened");
     }
+
+    [Fact]
+    public void Fill_WithDateTimeFormat_FormatsCorrectly()
+    {
+        var template = "Date: {date:yyyy-MM-dd}";
+        var result = template.Fill(new { date = new DateTime(2025, 12, 17) });
+
+        result.ShouldBe("Date: 2025-12-17");
+    }
+
+    [Fact]
+    public void Fill_WithCurrencyFormat_FormatsCorrectly()
+    {
+        var template = "Price: {amount:C2}";
+        var result = template.Fill(new { amount = 29.99m });
+
+        result.ShouldBe("Price: ¤29.99"); // InvariantCulture uses ¤ symbol
+    }
+
+    [Fact]
+    public void Fill_WithNumberFormat_FormatsCorrectly()
+    {
+        var template = "Count: {count:N0}";
+        var result = template.Fill(new { count = 1234567 });
+
+        result.ShouldBe("Count: 1,234,567");
+    }
+
+    [Fact]
+    public void Fill_WithMultipleFormats_FormatsAllCorrectly()
+    {
+        var template = "Order on {date:MMM dd, yyyy} for {price:C2}";
+        var result = template.Fill(new { 
+            date = new DateTime(2025, 12, 17), 
+            price = 99.50m 
+        });
+
+        result.ShouldBe("Order on Dec 17, 2025 for ¤99.50"); // InvariantCulture uses ¤ symbol
+    }
+
+    [Fact]
+    public void Fill_WithStringAndFallback_UsesFallbackNotFormat()
+    {
+        var template = "Hello {name:Guest}";
+        var result = template.Fill(new { name = "John" });
+
+        result.ShouldBe("Hello John");
+    }
+
+    [Fact]
+    public void Fill_WithInvalidFormatOnDateTime_AppliesPartialFormat()
+    {
+        var template = "Value: {num:0.00}";
+        var result = template.Fill(new { num = 123.456m });
+
+        result.ShouldBe("Value: 123.46");
+    }
 }
