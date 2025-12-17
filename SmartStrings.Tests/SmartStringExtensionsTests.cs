@@ -1,9 +1,21 @@
 using Shouldly;
+using System;
 
 namespace SmartStrings.Tests;
 
-public class SmartStringExtensionsTests
+public class SmartStringExtensionsTests : IDisposable
 {
+    public SmartStringExtensionsTests()
+    {
+        // Reset global options before each test
+        SmartStringExtensions.ConfigureDefaults(new SmartStringsOptions());
+    }
+
+    public void Dispose()
+    {
+        // Reset global options after each test
+        SmartStringExtensions.ConfigureDefaults(new SmartStringsOptions());
+    }
     
     [Fact]
     public void Fill_WithSinglePlaceholder_ReplacesCorrectly()
@@ -186,5 +198,63 @@ public class SmartStringExtensionsTests
         var result = template.Fill(new { num = 123.456m });
 
         result.ShouldBe("Value: 123.46");
+    }
+
+    [Fact]
+    public void Fill_WithCultureParameter_UsesSpecifiedCulture()
+    {
+        var template = "Price: {amount:C2}";
+        var enUS = new System.Globalization.CultureInfo("en-US");
+        var result = template.Fill(new { amount = 29.99m }, enUS);
+
+        result.ShouldBe("Price: $29.99");
+    }
+
+    [Fact]
+    public void Fill_WithoutCultureParameter_UsesCurrentCulture()
+    {
+        var template = "Price: {amount:C2}";
+        var result = template.Fill(new { amount = 29.99m });
+
+        // Should use InvariantCulture by default (¤ symbol)
+        result.ShouldBe("Price: ¤29.99");
+    }
+
+    [Fact]
+    public void Fill_WithDifferentCultures_ProducesDifferentDateResults()
+    {
+        var template = "Date: {date:D}";
+        var date = new DateTime(2025, 12, 17);
+        
+        var enUS = new System.Globalization.CultureInfo("en-US");
+        var frFR = new System.Globalization.CultureInfo("fr-FR");
+        var ptBR = new System.Globalization.CultureInfo("pt-BR");
+        
+        var resultEN = template.Fill(new { date }, enUS);
+        var resultFR = template.Fill(new { date }, frFR);
+        var resultPT = template.Fill(new { date }, ptBR);
+
+        resultEN.ShouldBe("Date: Wednesday, December 17, 2025");
+        resultFR.ShouldBe("Date: mercredi 17 décembre 2025");
+        resultPT.ShouldBe("Date: quarta-feira, 17 de dezembro de 2025");
+    }
+
+    [Fact]
+    public void Fill_WithDifferentCultures_ProducesDifferentCurrencyResults()
+    {
+       var template = "Price: {amount:C2}";
+       var amount = 29.99m;
+        
+        var enUS = new System.Globalization.CultureInfo("en-US");
+        var frFR = new System.Globalization.CultureInfo("fr-FR");
+        var ptBR = new System.Globalization.CultureInfo("pt-BR");
+        
+        var resultEN = template.Fill(new { amount }, enUS);
+        var resultFR = template.Fill(new { amount }, frFR);
+        var resultPT = template.Fill(new { amount }, ptBR);
+
+        resultEN.ShouldBe("Price: $29.99");
+        resultFR.ShouldBe("Price: 29,99 €");
+        resultPT.ShouldBe("Price: R$ 29,99");
     }
 }
