@@ -207,13 +207,11 @@ builder.Services.AddSmartStrings(builder.Configuration.GetSection("SmartStrings"
 // Override culture per template
 "{price:C2}".Fill(new { price = 29.99m }, new CultureInfo("fr-FR")); // "29,99 €"
 
-// Multiple cultures in one template
-var template = "US: {price:C2}, BR: {price:C2}, FR: {price:C2}";
+// Different templates for different cultures
 var data = new { price = 29.99m };
-var result = $"US: {template.Fill(data, new CultureInfo("en-US"))}, " +
-             $"BR: {template.Fill(data, new CultureInfo("pt-BR"))}, " +
-             $"FR: {template.Fill(data, new CultureInfo("fr-FR"))}";
-// Result: "US: $29.99, BR: R$ 29,99, FR: 29,99 €"
+var usPrice = "US: {price:C2}".Fill(data, new CultureInfo("en-US")); // "US: $29.99"
+var brPrice = "BR: {price:C2}".Fill(data, new CultureInfo("pt-BR")); // "BR: R$ 29,99"
+var frPrice = "FR: {price:C2}".Fill(data, new CultureInfo("fr-FR")); // "FR: 29,99 €"
 ```
 
 ---
