@@ -10,6 +10,7 @@ using System.Globalization;
 #if NET6_0_OR_GREATER
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 #endif
 
 namespace SmartStrings
@@ -73,6 +74,58 @@ namespace SmartStrings
             {
                 options.DefaultCulture = culture;
             });
+        }
+
+        /// <summary>
+        /// Adds SmartStrings configuration from a configuration section.
+        /// Supports binding from appsettings.json.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="configurationSection">The configuration section containing SmartStrings options.</param>
+        /// <returns>The service collection for chaining.</returns>
+        public static IServiceCollection AddSmartStrings(
+            this IServiceCollection services,
+            IConfigurationSection configurationSection)
+        {
+            services.Configure<SmartStringsOptions>(options =>
+            {
+                configurationSection.Bind(options);
+            });
+
+            // Apply configuration to global defaults
+            var options = new SmartStringsOptions();
+            configurationSection.Bind(options);
+            SmartStringExtensions.ConfigureDefaults(options);
+
+            return services;
+        }
+
+        /// <summary>
+        /// Adds SmartStrings configuration from a configuration section with additional configuration.
+        /// Supports binding from appsettings.json with override options.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="configurationSection">The configuration section containing SmartStrings options.</param>
+        /// <param name="configure">Additional configuration action to override or supplement configuration values.</param>
+        /// <returns>The service collection for chaining.</returns>
+        public static IServiceCollection AddSmartStrings(
+            this IServiceCollection services,
+            IConfigurationSection configurationSection,
+            Action<SmartStringsOptions> configure)
+        {
+            services.Configure<SmartStringsOptions>(options =>
+            {
+                configurationSection.Bind(options);
+                configure(options);
+            });
+
+            // Apply combined configuration to global defaults
+            var options = new SmartStringsOptions();
+            configurationSection.Bind(options);
+            configure(options);
+            SmartStringExtensions.ConfigureDefaults(options);
+
+            return services;
         }
     }
 #endif
