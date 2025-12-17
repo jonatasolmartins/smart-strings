@@ -9,13 +9,13 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
 
     <PackageId>SmartStrings</PackageId>
-    <Version>1.1.0</Version>
+    <Version>2.0.0</Version>
     
     <Authors>Jonatas Olziris Martins</Authors>
     <Company>Jonatas Olziris Martins</Company>
-    <Description>SmartStrings is a lightweight string templating library for C# with support for named placeholders, fallbacks, and object binding.</Description>
+    <Description>SmartStrings is a lightweight string templating library for C# with support for named placeholders, format specifiers, culture support, and ASP.NET Core integration.</Description>
     <PackageReadmeFile>README.nuget.md</PackageReadmeFile>
-    <PackageTags>string;templating;placeholder;interpolation;utility</PackageTags>
+    <PackageTags>string;templating;placeholder;interpolation;utility;format;culture;localization;aspnetcore</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/jonatasolmartins/smart-strings</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
