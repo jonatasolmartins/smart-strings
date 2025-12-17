@@ -18,6 +18,8 @@
 ## ✨ Features
 
 - ✅ Replace named placeholders like `{name}`, `{plan}`, etc.
+- ✅ **Format specifiers** for dates, numbers, currency: `{date:yyyy-MM-dd}`, `{price:C2}`
+- ✅ **Culture support** with ASP.NET Core integration and `appsettings.json` binding
 - ✅ Optional fallback values using `{name:Guest}` syntax
 - ✅ Fill from:
   - A single value
@@ -114,7 +116,107 @@ var result = template.Fill(new { });
 // Result: "Hi Guest, welcome!"
 ```
 
-## ✅ 6. Manual mapping with nested model
+---
+
+### ✅ 6. Format specifiers for dates, numbers, and currency
+
+```csharp
+// DateTime formatting
+var template = "Event date: {date:yyyy-MM-dd}";
+var result = template.Fill(new { date = new DateTime(2025, 12, 17) });
+// Result: "Event date: 2025-12-17"
+
+// Currency formatting
+var template = "Total: {amount:C2}";
+var result = template.Fill(new { amount = 1299.99m });
+// Result: "Total: ¤1,299.99"
+
+// Number formatting
+var template = "Downloads: {count:N0}";
+var result = template.Fill(new { count = 1234567 });
+// Result: "Downloads: 1,234,567"
+
+// Multiple formats in one template
+var template = "Order #{id} on {date:MMM dd, yyyy} - Total: {total:C2}";
+var result = template.Fill(new { 
+    id = 12345,
+    date = new DateTime(2025, 12, 17),
+    total = 599.50m
+});
+// Result: "Order #12345 on Dec 17, 2025 - Total: ¤599.50"
+```
+
+---
+
+### ✅ 7. Configuration-based URL templating
+
+Perfect for `appsettings.json` and HTTP clients:
+
+```json
+{
+  "ApiEndpoints": {
+    "UserOrders": "https://api.company.com/v{version}/users/{userId}/orders?date={date:yyyy-MM-dd}&status={status:active}"
+  }
+}
+```
+
+```csharp
+var urlTemplate = _config["ApiEndpoints:UserOrders"];
+var url = urlTemplate.Fill(new {
+    version = 2,
+    userId = "abc123",
+    date = DateTime.Now,
+    status = "pending"
+});
+// Result: "https://api.company.com/v2/users/abc123/orders?date=2025-12-17&status=pending"
+```
+
+---
+
+### ✅ 8. Culture support for international applications
+
+**ASP.NET Core Integration:**
+```csharp
+// Program.cs - Multiple configuration options
+builder.Services.AddSmartStrings("en-US"); // Simple culture
+builder.Services.AddSmartStrings(options => 
+{
+    options.DefaultCulture = new CultureInfo("pt-BR");
+    options.InheritThreadCulture = true; // Respects ASP.NET request localization
+});
+
+// From appsettings.json
+builder.Services.AddSmartStrings(builder.Configuration.GetSection("SmartStrings"));
+```
+
+**appsettings.json:**
+```json
+{
+  "SmartStrings": {
+    "DefaultCulture": "en-US",
+    "InheritThreadCulture": true
+  }
+}
+```
+
+**Usage with different cultures:**
+```csharp
+// Uses configured culture
+"{price:C2}".Fill(new { price = 29.99m }); // "$29.99" (en-US) or "R$ 29,99" (pt-BR)
+
+// Override culture per template
+"{price:C2}".Fill(new { price = 29.99m }, new CultureInfo("fr-FR")); // "29,99 €"
+
+// Different templates for different cultures
+var data = new { price = 29.99m };
+var usPrice = "US: {price:C2}".Fill(data, new CultureInfo("en-US")); // "US: $29.99"
+var brPrice = "BR: {price:C2}".Fill(data, new CultureInfo("pt-BR")); // "BR: R$ 29,99"
+var frPrice = "FR: {price:C2}".Fill(data, new CultureInfo("fr-FR")); // "FR: 29,99 €"
+```
+
+---
+
+## ✅ 9. Manual mapping with nested model
 
 ```csharp
 var card = new Card()
@@ -135,7 +237,7 @@ template.Fill(card, map => {
 
 ---
 
-## ✅ 7. Using TemplateString.Fill (Alternative API)
+## ✅ 10. Using TemplateString.Fill (Alternative API)
 
 ```csharp
 TemplateString.Fill("Hello {USERNAME}", new { USERNAME = "Joana" });
@@ -143,6 +245,9 @@ TemplateString.Fill("Hello {USERNAME}", new { USERNAME = "Joana" });
 TemplateString.Fill("User: {NAME}", user, map => {
     map.Bind("NAME", u => u.User.Name);
 });
+
+// With culture
+TemplateString.Fill("Price: {amount:C2}", new { amount = 29.99m }, new CultureInfo("en-US"));
 ```
 ---
 
@@ -155,15 +260,22 @@ string Fill(this string template, string value);
 // Replace all {..} in order
 string Fill(this string template, params string[] values);
 
-/// Replaces placeholders in the template with values from a model or primitive values..
+// Replaces placeholders with values from a model or primitive values
 string Fill<T>(this string template, T values);
+
+// With culture support
+string Fill<T>(this string template, T values, CultureInfo culture);
 
 // Replace named placeholders with dictionary values
 string Fill(this string template, Dictionary<string, string?> values);
 
-// Fills a template using the flat properties of a model, allowing custom overrides for nested or formatted values.
-string Fill<T>(this string template, T model, Action<TemplateMap<T>> map)
+// Manual mapping for nested or formatted values
+string Fill<T>(this string template, T model, Action<TemplateMap<T>> map);
 
+// ASP.NET Core DI integration (.NET 6+)
+IServiceCollection AddSmartStrings(this IServiceCollection services, string cultureName);
+IServiceCollection AddSmartStrings(this IServiceCollection services, Action<SmartStringsOptions> configure);
+IServiceCollection AddSmartStrings(this IServiceCollection services, IConfigurationSection configurationSection);
 ```
 
 ---

@@ -6,8 +6,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+
+[assembly: InternalsVisibleTo("SmartStrings.Tests")]
 
 namespace SmartStrings
 {
@@ -70,6 +74,24 @@ namespace SmartStrings
             SmartStringExtensions.Fill(template, values);
 
         /// <summary>
+        /// Replaces placeholders in the template with values from a model using the specified culture.
+        /// Supports both flat objects (with public properties) and primitive values.
+        /// Named placeholders support format specifiers in the form <c>{key:format}</c> for IFormattable types,
+        /// or fallback values for non-formattable types.
+        /// </summary>
+        /// <remarks>
+        /// If the model is a primitive or string, replaces the first placeholder only.
+        /// If the template is null or empty, it is returned as is.
+        /// Format specifiers work with DateTime, decimal, int, and other IFormattable types.
+        /// </remarks>
+        /// <param name="template">The template string containing named or positional placeholders.</param>
+        /// <param name="values">A value or object whose data is used to fill the template.</param>
+        /// <param name="culture">The culture to use for formatting. If null, uses configured culture or Thread.CurrentCulture.</param>
+        /// <returns>The filled string with placeholders replaced accordingly.</returns>
+        public static string Fill<T>(string template, T values, CultureInfo culture) =>
+            SmartStringExtensions.Fill(template, values, culture);
+
+        /// <summary>
         /// Fills a template using the flat properties of a model, allowing custom overrides for nested or formatted values.
         /// </summary>
         public static string Fill<T>(string template, T model, Action<TemplateMap<T>> map) =>
@@ -82,6 +104,40 @@ namespace SmartStrings
     {
         private static readonly Regex NamedPlaceholderRegex = new Regex(@"\{(\w+)(?::([^}]*))?\}", RegexOptions.Compiled);
         private static readonly Regex GenericPlaceholderRegex = new Regex(@"\{[^{}]+\}", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Global configuration options for SmartStrings.
+        /// </summary>
+        internal static SmartStringsOptions GlobalOptions { get; private set; } = new SmartStringsOptions();
+
+        /// <summary>
+        /// Configures global defaults for SmartStrings. Used internally by DI extensions.
+        /// </summary>
+        /// <param name="options">The options to apply globally.</param>
+        internal static void ConfigureDefaults(SmartStringsOptions options)
+        {
+            GlobalOptions = options ?? new SmartStringsOptions();
+        }
+
+        /// <summary>
+        /// Resolves the culture to use for formatting based on configuration and parameters.
+        /// </summary>
+        /// <param name="explicitCulture">Explicitly provided culture (highest priority).</param>
+        /// <returns>The culture to use for formatting.</returns>
+        private static CultureInfo ResolveCulture(CultureInfo? explicitCulture)
+        {
+            // Priority: explicit > configured > Thread.CurrentCulture > InvariantCulture
+            if (explicitCulture != null)
+                return explicitCulture;
+
+            if (GlobalOptions.DefaultCulture != null)
+                return GlobalOptions.DefaultCulture;
+
+            if (GlobalOptions.InheritThreadCulture)
+                return CultureInfo.CurrentCulture;
+
+            return CultureInfo.InvariantCulture;
+        }
 
         /// <summary>
         /// Replaces the first placeholder in the string with the provided value.
@@ -149,22 +205,44 @@ namespace SmartStrings
         /// <summary>
         /// Replaces placeholders in the template with values from a model.
         /// Supports both flat objects (with public properties) and primitive values.
-        /// Named placeholders support fallback values in the form <c>{key:fallback}</c>.
+        /// Named placeholders support format specifiers in the form <c>{key:format}</c> for IFormattable types,
+        /// or fallback values for non-formattable types.
         /// </summary>
         /// <remarks>
         /// If the model is a primitive or string, replaces the first placeholder only.
         /// If the template is null or empty, it is returned as is.
+        /// Format specifiers work with DateTime, decimal, int, and other IFormattable types.
         /// </remarks>
         /// <param name="template">The template string containing named or positional placeholders.</param>
         /// <param name="values">A value or object whose data is used to fill the template.</param>
         /// <returns>The filled string with placeholders replaced accordingly.</returns>
         public static string Fill<T>(this string template, T values)
         {
+            return Fill(template, values, (CultureInfo?)null);
+        }
+
+        /// <summary>
+        /// Replaces placeholders in the template with values from a model using the specified culture.
+        /// Supports both flat objects (with public properties) and primitive values.
+        /// Named placeholders support format specifiers in the form <c>{key:format}</c> for IFormattable types,
+        /// or fallback values for non-formattable types.
+        /// </summary>
+        /// <remarks>
+        /// If the model is a primitive or string, replaces the first placeholder only.
+        /// If the template is null or empty, it is returned as is.
+        /// Format specifiers work with DateTime, decimal, int, and other IFormattable types.
+        /// </remarks>
+        /// <param name="template">The template string containing named or positional placeholders.</param>
+        /// <param name="values">A value or object whose data is used to fill the template.</param>
+        /// <param name="culture">The culture to use for formatting. If null, uses configured culture or Thread.CurrentCulture.</param>
+        /// <returns>The filled string with placeholders replaced accordingly.</returns>
+        public static string Fill<T>(this string template, T values, CultureInfo? culture)
+        {
 
             if (string.IsNullOrEmpty(template)) return template;
 
             if (values is null)
-                return template.Fill(new Dictionary<string, string?>());
+                return template.FillWithObjects(new Dictionary<string, object?>(), culture);
 
             var type = typeof(T);
 
@@ -173,13 +251,13 @@ namespace SmartStrings
                 return template.Fill(values?.ToString() ?? string.Empty);
             }
 
-            var dict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            var dict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
             foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                dict[prop.Name] = prop.GetValue(values)?.ToString();
+                dict[prop.Name] = prop.GetValue(values);
             }
 
-            return template.Fill(dict);
+            return template.FillWithObjects(dict, culture);
 
         }
 
@@ -221,6 +299,46 @@ namespace SmartStrings
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Replaces named placeholders in the template with values from a dictionary of objects.
+        /// Supports format specifiers for IFormattable types (DateTime, decimal, etc.) in the form <c>{key:format}</c>.
+        /// For non-formattable types, the colon value is used as a fallback.
+        /// </summary>
+        private static string FillWithObjects(this string template, Dictionary<string, object?> values, CultureInfo? culture = null)
+        {
+            if (string.IsNullOrEmpty(template)) return template;
+
+            var resolvedCulture = ResolveCulture(culture);
+
+            return NamedPlaceholderRegex.Replace(template, match =>
+            {
+                var key = match.Groups[1].Value;
+                var formatOrFallback = match.Groups[2].Success ? match.Groups[2].Value : string.Empty;
+
+                if (values.TryGetValue(key, out var value) && value != null)
+                {
+                    // Check if value implements IFormattable and has a format/fallback specified
+                    if (value is IFormattable formattable && !string.IsNullOrEmpty(formatOrFallback))
+                    {
+                        try
+                        {
+                            // Try to apply format - if it fails, treat as fallback
+                            return formattable.ToString(formatOrFallback, resolvedCulture);
+                        }
+                        catch
+                        {
+                            // Format string was invalid, use as fallback instead
+                            return formatOrFallback;
+                        }
+                    }
+                    return value.ToString() ?? string.Empty;
+                }
+
+                // Key not found or value is null, use fallback
+                return formatOrFallback;
+            });
         }
     }
 
