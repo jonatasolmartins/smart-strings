@@ -303,7 +303,7 @@ If SmartStrings has saved you time or made your life easier, please consider:
 
 Thank you! 🙌
 
-☕ [Buy Me a Coffee](https://buymeacoffee.com/jonatasolmartins)
+☕ [Buy Me a Coffee with ₿] -> erodingbowl94@walletofsatoshi.com or bc1q4sv5sgp4k6tdtrcrhk9nldq5d4ja3rhvr5rluu
 
 ## 📄 License
 
